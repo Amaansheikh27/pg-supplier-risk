@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
+import plotly.io as pio
 
 st.set_page_config(
     page_title="P&G Supplier Risk Intelligence",
@@ -17,21 +18,41 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    .kpi-red   { background: linear-gradient(135deg,#C0392B,#E31837); padding:18px 22px;
-                 border-radius:10px; color:white; text-align:center; }
-    .kpi-blue  { background: linear-gradient(135deg,#003594,#0052CC); padding:18px 22px;
-                 border-radius:10px; color:white; text-align:center; }
-    .kpi-orange{ background: linear-gradient(135deg,#E67E22,#FF8C00); padding:18px 22px;
-                 border-radius:10px; color:white; text-align:center; }
-    .kpi-green { background: linear-gradient(135deg,#1E8449,#28A745); padding:18px 22px;
-                 border-radius:10px; color:white; text-align:center; }
+    .kpi-red   { background:linear-gradient(135deg,#7B0D1E,#E31837); padding:18px 22px;
+                 border-radius:10px; color:white; text-align:center;
+                 border:1px solid rgba(227,24,55,0.4); }
+    .kpi-blue  { background:linear-gradient(135deg,#003594,#0052CC); padding:18px 22px;
+                 border-radius:10px; color:white; text-align:center;
+                 border:1px solid rgba(74,158,255,0.3); }
+    .kpi-orange{ background:linear-gradient(135deg,#7A3B00,#FF8C00); padding:18px 22px;
+                 border-radius:10px; color:white; text-align:center;
+                 border:1px solid rgba(255,140,0,0.4); }
+    .kpi-green { background:linear-gradient(135deg,#0D3B1F,#28A745); padding:18px 22px;
+                 border-radius:10px; color:white; text-align:center;
+                 border:1px solid rgba(40,167,69,0.4); }
     .kpi-value { font-size:2rem; font-weight:700; margin:0; }
     .kpi-label { font-size:0.85rem; opacity:0.9; margin:4px 0 0 0; }
     .kpi-sub   { font-size:0.78rem; opacity:0.75; margin:2px 0 0 0; }
+    [data-testid="stMetric"] { background:rgba(255,255,255,0.05); border-radius:8px;
+                                padding:12px; border:1px solid rgba(255,255,255,0.08); }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+pio.templates["pg_dark"] = go.layout.Template(
+    layout=go.Layout(
+        font=dict(color="#E8EAED", family="sans-serif"),
+        xaxis=dict(tickfont=dict(color="#E8EAED"), linecolor="rgba(255,255,255,0.15)"),
+        yaxis=dict(tickfont=dict(color="#E8EAED"), linecolor="rgba(255,255,255,0.15)"),
+        legend=dict(font=dict(color="#E8EAED"), bgcolor="rgba(255,255,255,0.05)",
+                    bordercolor="rgba(255,255,255,0.1)"),
+        hoverlabel=dict(bgcolor="#1E2A3A", font=dict(color="#E8EAED"),
+                        bordercolor="rgba(74,158,255,0.5)"),
+        colorway=["#4A9EFF","#E31837","#FF8C00","#28A745","#9B59B6","#1ABC9C"],
+    )
+)
+pio.templates.default = "pg_dark"
 
 TIER_COLORS = {1: "#E31837", 2: "#FF8C00", 3: "#28A745"}
 TIER_LABELS = {1: "Tier 1 — High Risk", 2: "Tier 2 — Moderate Risk", 3: "Tier 3 — Low Risk"}
@@ -166,15 +187,16 @@ with tab1:
         geo=dict(
             showframe=False,
             showcoastlines=True,
-            coastlinecolor="#444",
+            coastlinecolor="rgba(74,158,255,0.4)",
             showland=True,
-            landcolor="#1a1a2e",
+            landcolor="#0D1B2A",
             showocean=True,
-            oceancolor="#0d1b2a",
+            oceancolor="#060D18",
             showcountries=True,
-            countrycolor="#333",
+            countrycolor="rgba(255,255,255,0.15)",
             projection_type="natural earth",
             bgcolor="rgba(0,0,0,0)",
+            lakecolor="#060D18",
         ),
         paper_bgcolor="rgba(0,0,0,0)",
         height=520,
@@ -201,7 +223,7 @@ with tab1:
     fig_country.update_traces(texttemplate="%{text} suppliers", textposition="outside")
     fig_country.update_layout(
         height=340, coloraxis_showscale=False,
-        plot_bgcolor="white", paper_bgcolor="white",
+        plot_bgcolor="rgba(255,255,255,0.03)", paper_bgcolor="rgba(0,0,0,0)",
         xaxis_tickangle=-35, margin=dict(t=50, b=80),
     )
     st.plotly_chart(fig_country, use_container_width=True)
@@ -260,11 +282,18 @@ with tab2:
             name=selected,
         ))
         fig_radar.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+            polar=dict(
+                radialaxis=dict(visible=True, range=[0, 100],
+                                gridcolor="rgba(255,255,255,0.1)",
+                                tickfont=dict(color="#E8EAED")),
+                angularaxis=dict(tickfont=dict(color="#E8EAED"),
+                                 linecolor="rgba(255,255,255,0.15)"),
+                bgcolor="rgba(255,255,255,0.03)",
+            ),
             showlegend=True,
             title=f"Risk Profile vs Portfolio Average",
             height=420,
-            paper_bgcolor="white",
+            paper_bgcolor="rgba(0,0,0,0)",
         )
         st.plotly_chart(fig_radar, use_container_width=True)
 
@@ -287,7 +316,7 @@ with tab2:
         fig_bars.update_layout(
             barmode="group", title="Dimension Scores vs Portfolio Average",
             yaxis=dict(range=[0, 100], title="Risk Score"),
-            height=420, plot_bgcolor="white", paper_bgcolor="white",
+            height=420, plot_bgcolor="rgba(255,255,255,0.03)", paper_bgcolor="rgba(0,0,0,0)",
         )
         st.plotly_chart(fig_bars, use_container_width=True)
 
@@ -345,7 +374,7 @@ with tab3:
         )
         fig_donut.update_layout(
             title=dict(text="Supplier Count by Risk Tier", font_size=15),
-            height=380, paper_bgcolor="white",
+            height=380, paper_bgcolor="rgba(0,0,0,0)",
             showlegend=True,
             legend=dict(orientation="h", y=-0.1, x=0.5, xanchor="center"),
             margin=dict(t=50, b=60, l=20, r=20),
@@ -367,9 +396,9 @@ with tab3:
         ))
         fig_spend.update_layout(
             title=dict(text="Annual Spend by Risk Tier ($M)", font_size=15),
-            yaxis=dict(title="Spend ($M)", showgrid=True, gridcolor="#f0f0f0"),
+            yaxis=dict(title="Spend ($M)", showgrid=True, gridcolor="rgba(255,255,255,0.08)"),
             xaxis=dict(tickfont_size=12),
-            height=380, plot_bgcolor="white", paper_bgcolor="white",
+            height=380, plot_bgcolor="rgba(255,255,255,0.03)", paper_bgcolor="rgba(0,0,0,0)",
             showlegend=False,
             margin=dict(t=50, b=60),
         )
@@ -414,9 +443,9 @@ with tab3:
     fig_cat.update_layout(
         barmode="stack",
         title=dict(text="Risk Tier Breakdown by Category (supplier count)", font_size=15),
-        yaxis=dict(title="Number of Suppliers", showgrid=True, gridcolor="#f0f0f0"),
+        yaxis=dict(title="Number of Suppliers", showgrid=True, gridcolor="rgba(255,255,255,0.08)"),
         xaxis=dict(tickangle=-30, tickfont_size=11),
-        height=380, plot_bgcolor="white", paper_bgcolor="white",
+        height=380, plot_bgcolor="rgba(255,255,255,0.03)", paper_bgcolor="rgba(0,0,0,0)",
         legend=dict(orientation="h", y=1.12, x=0.5, xanchor="center"),
         margin=dict(t=70, b=100),
     )
@@ -472,9 +501,9 @@ with tab3:
                                 showarrow=False)
 
     fig_scatter.update_layout(
-        xaxis=dict(title="Composite Risk Score", range=[0, 105], showgrid=True, gridcolor="#f0f0f0"),
-        yaxis=dict(title="Annual Spend ($M)", showgrid=True, gridcolor="#f0f0f0"),
-        height=500, plot_bgcolor="white", paper_bgcolor="white",
+        xaxis=dict(title="Composite Risk Score", range=[0, 105], showgrid=True, gridcolor="rgba(255,255,255,0.08)"),
+        yaxis=dict(title="Annual Spend ($M)", showgrid=True, gridcolor="rgba(255,255,255,0.08)"),
+        height=500, plot_bgcolor="rgba(255,255,255,0.03)", paper_bgcolor="rgba(0,0,0,0)",
         legend=dict(orientation="h", y=1.05, x=0.5, xanchor="center"),
         hovermode="closest",
         margin=dict(t=60, b=50),
